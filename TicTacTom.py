@@ -1,64 +1,50 @@
 import numpy as np
-
-#A single layer perceptron network consisting of only one set of weights
-class PerceptronNeuralNetwork():
-    def __init__(self, x, y):
-        #self.learning_rate = 1-6
+import os
+class gameboard():
+    def __init__(self, seed=2):
+        #np.random.seed(seed)
+        self.debug = False
+        self.gamestate = np.full((3,3), 0) #Initialise the board to be all ' ' characters
+        self.gameboard = np.full((3,3), ' ') #Initiaise the graphical board
+        self.actionOnPlayer = np.random.choice([1,2]) #1 = Player, 2 = AI
         
-        np.random.seed(1)
-        
-        #w, h matrix
-        #2 * the matrix size, then -1 to get the mean of 0 and -1 < x <1
-        self.weights = 2 * np.random.random((x,y)) - 1
-    
-    #Normalise to 0<x<1
-    def sigmoid(self, x):
-        return 1 / (1+ np.exp(-x))
-    
-    #Calculate the derivative of sigmoid for cost calculation
-    def sigmoidDerivative(self, x):
-        return x * (1 - x)
+    def getPlayerStr(self):
+        if self.actionOnPlayer == 1:
+            return "X"
+        else:
+            return "O"
 
-    #Iterate over samples, calculate a cost for each and tweak weights to
-    #converge on a minimum
-    def train(self, training_inputs, training_labels, iterations):
-        for iteration in range(iterations):
-            output = self.think(training_inputs)
+    def nextTurn(self):
+        print("Enter the desired X, Y location on the board.")
+        x = input("X:")
+        y = input("Y:")
 
-            error = training_labels - output 
+        self.processTurn(int(x),int(y)) 
+        self.display()
 
-            cost = np.dot(training_inputs.T, error * self.sigmoidDerivative(output))
+    def processTurn(self, x, y):
+        #Check that the selection is a valid location
+        if True:#self.checkSpot(player, i)
+           self.gamestate[y-1][x-1] = self.actionOnPlayer  
+           self.gameboard[y-1][x-1] = self.getPlayerStr()  
 
-            self.weights += cost
+    def display(self):
+        if self.debug:
+            print(self.gamestate)
+        print(self.gameboard) 
 
-    #Mult the input matrix with the weights to get the output
-    def think(self, input):
-        input = input.astype(float)
-
-        output = self.sigmoid(np.dot(input, self.weights))
-        return output
+def clearScrean():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 if __name__ == '__main__':
+    game = gameboard()
+    clearScrean()
+    print("Welcome to TicTacTom!\nThe first player is being chosen at random.")
+    if game.actionOnPlayer is 1:
+        print("The first player to take a turn is YOU")
+    else:
+        print("The AI gets the first turn")
 
-        neural_network = PerceptronNeuralNetwork(3,1)
-
-        # The training set, with 4 examples consisting of 3
-        # input values and 1 output value
-        training_inputs = np.array([[0,0,1],
-                                    [1,1,1],
-                                    [1,0,1],
-                                    [0,1,1]])
-
-        training_outputs = np.array([[0,1,1,0]]).T
-
-        # Train the neural network
-        neural_network.train(training_inputs, training_outputs, 10000)
+    game.nextTurn()
 
 
-        A = str(input("Input 1: "))
-        B = str(input("Input 2: "))
-        C = str(input("Input 3: "))
-        
-        print("New situation: input data = ", A, B, C)
-        print("Output data: ")
-        print(neural_network.think(np.array([A, B, C]))) 
