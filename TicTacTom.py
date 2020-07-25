@@ -13,6 +13,12 @@ class gameboard():
             return "X"
         else:
             return "O"
+    
+    def switchPlayer(self):
+        if self.actionOnPlayer == 1:
+            self.actionOnPlayer = 2
+        else:
+            self.actionOnPlayer = 1
 
     def nextTurn(self):
         print("Enter the desired X, Y location on the board.")
@@ -22,6 +28,10 @@ class gameboard():
         self.processTurn(int(x),int(y)) 
         self.display()
 
+        if True: #self.checkForWin()
+            self.switchPlayer()
+            self.nextTurn()
+
     def processTurn(self, x, y):
         #Check that the selection is a valid location
         if True:#self.checkSpot(player, i)
@@ -29,6 +39,7 @@ class gameboard():
            self.gameboard[y-1][x-1] = self.getPlayerStr()  
 
     def display(self):
+        clearScrean()
         if self.debug:
             print(self.gamestate)
         print(self.gameboard) 
