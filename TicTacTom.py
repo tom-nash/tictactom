@@ -3,7 +3,7 @@ import os
 class gameboard():
     def __init__(self, seed=2):
         #np.random.seed(seed)
-        self.debug = False
+        self.debug = True
         self.gamestate = np.full((3,3), 0) #Initialise the board to be all ' ' characters
         self.gameboard = np.full((3,3), ' ') #Initiaise the graphical board
         self.actionOnPlayer = np.random.choice([1,2]) #1 = Player, 2 = AI
@@ -25,18 +25,28 @@ class gameboard():
         x = input("X:")
         y = input("Y:")
 
-        self.processTurn(int(x),int(y)) 
-        self.display()
+        if self.processTurn(int(x),int(y)):
+            self.display()
+        else:
+            #turn invalid
+            self.nextTurn()
 
-        if True: #self.checkForWin()
+        if not self.checkForWin():
             self.switchPlayer()
             self.nextTurn()
+        else: #handle win
+            print("Game over ", self.getPlayerStr(), " wins!")
 
     def processTurn(self, x, y):
         #Check that the selection is a valid location
-        if True:#self.checkSpot(player, i)
+        if self.checkSpot(x,y):
            self.gamestate[y-1][x-1] = self.actionOnPlayer  
            self.gameboard[y-1][x-1] = self.getPlayerStr()  
+           print(x,y," is a valid selection")
+           return True
+        else:
+            print("Invalid selection. Try again")
+            return False
 
     def display(self):
         clearScrean()
@@ -44,6 +54,29 @@ class gameboard():
             print(self.gamestate)
         print(self.gameboard) 
 
+    def checkSpot(self, x,y):
+        if self.gamestate[y-1][x-1] == 1 or self.gamestate[y-1][x-1] == 2:
+            return False
+        else:
+            return True
+    def checkForWin(self):
+        for indexes in win_indexes(3):
+            if all(self.gamestate[r][c] == self.actionOnPlayer for r, c in indexes):
+                return True
+        return False 
+
+def win_indexes(n):
+    # Rows
+    for r in range(n):
+        yield [(r, c) for c in range(n)]
+    # Columns
+    for c in range(n):
+        yield [(r, c) for r in range(n)]
+    # Diagonal top left to bottom right
+    yield [(i, i) for i in range(n)]
+    # Diagonal top right to bottom left
+    yield [(i, n - 1 - i) for i in range(n)]
+ 
 def clearScrean():
     os.system('cls' if os.name == 'nt' else 'clear')
 
