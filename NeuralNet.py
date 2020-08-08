@@ -11,7 +11,18 @@ class PerceptronNeuralNetwork():
 
         #w, h matrix
         #2 * the matrix size, then -1 to get the mean of 0 and -1 < x <1
-        self.weights = 2 * np.random.random((x,y)) - 1
+
+        self.layeroneweights = 2 * np.random.random((9,1)) - 1 #9 nodes
+        self.layertwoweights = 2 * np.random.random((729,1)) - 1 #81 nodes
+        self.layerthreeweights = 2 * np.random.random((6561,1)) - 1 #729 nodes
+        self.layerfourweights = 2 * np.random.random((729,1)) - 1 #81 nodes
+        self.layerfiveweights = 2 * np.random.random((9,1)) - 1 #9 nodes
+
+        print(self.layeroneweights)
+        print(self.layertwoweights)
+        print(self.layerthreeweights)
+        print(self.layerfourweights)
+        print(self.layerfiveweights)
 
     #Normalise to 0<x<1
     def sigmoid(self, x):
@@ -58,6 +69,17 @@ if __name__ == '__main__':
         #The game boards 9x1 * No. of samples
         # The training set, with 4 examples consisting of 3
         # input values and 1 output value
+
+        #I need a way of generating 9x1 game board permutations which lead to a win or loss.
+        #
+        #   Generate random game moves which lead to wins, pass each win as a 0 label attached to the state of
+        #   the board at each move.
+        #
+        #   - The game must be run with random valid moves made until a win condition is reached.
+        #   - the game must append to a text file each move of a win game.
+        #   - The AI always gets O (Naughts)
+        #   - 
+        #
         training_inputs = np.array([[0,0,1],
                                     [1,1,1],
                                     [1,0,1],
