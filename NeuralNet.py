@@ -1,29 +1,6 @@
 import numpy as np
+import csv
 from TicTacTom import gameboard
-
-#A single layer perceptron network consisting of only one set of weights
-class PerceptronNeuralNetwork():
-    def __init__(self, x, y):
-        self.gameboard = None
-
-        #self.learning_rate = 1-6
-
-        np.random.seed(1)
-
-        #w, h matrix
-        #2 * the matrix size, then -1 to get the mean of 0 and -1 < x <1
-
-        self.layeroneweights = 2 * np.random.random((9,1)) - 1 #9 nodes
-        self.layertwoweights = 2 * np.random.random((729,1)) - 1 #81 nodes
-        self.layerthreeweights = 2 * np.random.random((6561,1)) - 1 #729 nodes
-        self.layerfourweights = 2 * np.random.random((729,1)) - 1 #81 nodes
-        self.layerfiveweights = 2 * np.random.random((9,1)) - 1 #9 nodes
-
-        # print(self.layeroneweights)
-        # print(self.layertwoweights)
-        # print(self.layerthreeweights)
-        # print(self.layerfourweights)
-        # print(self.layerfiveweights)
 
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
@@ -87,32 +64,82 @@ def generate_dataset(games):
 
         #the desired output (0-9) should be the next move
 
+class Network():
+    def __init__(self):
+        self.layer1 = Layer_Dense(9,729)
+        self.layer2 = Layer_Dense(729,6561)
+        self.layer3 = Layer_Dense(6561,729)
+        self.layer4 = Layer_Dense(729,9)
+
+        self.ReLU = Activation_ReLU()
+        self.sigmoid = Activation_Sigmoid()
+
+        self.dataset = []
+
+    def train(self, path, iterations):
+        #self.dataset
+        with open('dataset.csv') as csvfile:
+            dataset_reader = csv.reader(csvfile)
+
+            self.dataset = list(dataset_reader)
+
+            # for sample in self.dataset:
+            #     print(', '.join(sample))
+
+
+            for iteration in range(iterations):
+                #Open dataset csv file with each game sequence separated by a new line /n separator
+                for sample_n in range(len(self.dataset)):
+
+                    for state_n in range(len(self.dataset[sample_n])):
+
+                        #output = self.think(sample_n)
+                        error = self.get_label(sample_n, state_n)# - output
+                        #exit()
+                        #layeronecost = np.dot(training_inputs.T, error * self.sigmoidDerivative(output))
+                        #layertwocost = np.dot(training_inputs.T, error * self.sigmoidDerivative(output))
+                        #layerthreecost = np.dot(training_inputs.T, error * self.sigmoidDerivative(output))
+                        #self.layeroneweights += layeronecost
+                        #self.layertwoweights += layertwocost
+                        #self.layeroneweights += layerthreecost
+                    break
+
+    def get_label(self, sample_n, state_n):
+        desired_index = [] #The desired output from the network (aka. the next decision the ai should make)
+
+        if len(self.dataset[sample_n]) - 1 > state_n:
+            a = np.array(self.dataset[sample_n][state_n+1])
+            print(a)
+            b = np.array(self.dataset[sample_n][state_n])
+            print(b)
+
+            #print(np.subtract(a,b))
+            #print(result)
+            
 if __name__ == '__main__':
 
-        X = np.random.random((1,9))
-        print(X)
+        #X is the current gamestate and y is the next move to make
+        #X = np.random.random((1,9))
+        #print(X)
 
-        layer1 = Layer_Dense(9,729)
-        layer2 = Layer_Dense(729,6561)
-        layer3 = Layer_Dense(6561,729)
-        layer4 = Layer_Dense(729,9)
+        network = Network()
 
-        ReLU = Activation_ReLU()
-        sigmoid = Activation_Sigmoid()
+        #Train on the dataset
+        network.train("./dataset.csv", 1)
 
-        layer1.forward(X)
-        ReLU.forward(layer1.output)
+        network.layer1.forward(X)
+        network.ReLU.forward(layer1.output)
 
-        layer2.forward(ReLU.output)
-        ReLU.forward(layer2.output)
+        network.layer2.forward(ReLU.output)
+        network.ReLU.forward(layer2.output)
 
-        layer3.forward(ReLU.output)
-        ReLU.forward(layer3.output)
+        networklayer3.forward(ReLU.output)
+        network.ReLU.forward(layer3.output)
 
-        layer4.forward(ReLU.output)
-        sigmoid.forward(layer4.output)
+        network.layer4.forward(ReLU.output)
+        network.sigmoid.forward(layer4.output)
 
-        print(sigmoid.output)
+        print(network.sigmoid.output)
 
 
         #The game boards 9x1 * No. of samples

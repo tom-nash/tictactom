@@ -1,4 +1,5 @@
 import numpy as np
+import csv
 import random
 import os
 #from NeuralNet import PerceptronNeuralNetwork
@@ -9,8 +10,10 @@ class gameboard():
         self.debug = True
         self.gamestate = np.full((3,3), 0) #Initialise the board to be all ' ' characters
         self.gameboard = np.full((3,3), ' ') #Initiaise the graphical board
+        self.gameboardlist = []
         self.actionOnPlayer = np.random.choice([1,2]) #1 = Player, 2 = AI
         self.running = False
+
     def getPlayerStr(self):
         if self.actionOnPlayer == 1:
             return "X"
@@ -27,14 +30,9 @@ class gameboard():
         # print("Enter the desired X, Y location on the board.")
         # x = input("X:")
         # y = input("Y:")
-        x = np.random.randint(1,3)
-        y = np.random.randint(1,3)
-
         self.processTurn()
-
+        self.gameboardlist.append(self.gamestate.flatten().tolist())
         self.display()
-
-
 
     def processTurn(self):
         #Check that the selection is a valid location
@@ -46,7 +44,6 @@ class gameboard():
                self.gamestate[y-1][x-1] = self.actionOnPlayer
                self.gameboard[y-1][x-1] = self.getPlayerStr()
                valid_selection = True
-
         return True
 
     def checkSpot(self, x,y):
@@ -61,6 +58,7 @@ class gameboard():
         for indexes in win_indexes(3):
             if all(self.gamestate[r][c] == self.actionOnPlayer for r, c in indexes):
                 game.running = False
+
                 return 1
         if np.count_nonzero(self.gamestate == 0)== 0:
             game.running = False
@@ -72,7 +70,6 @@ class gameboard():
         if self.debug:
            print(self.gamestate.flatten())
         #print(self.gameboard)
-
 
 def win_indexes(n):
     # Rows
@@ -89,30 +86,40 @@ def win_indexes(n):
 def clearScrean():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def dumpData(boardlist):
+    with open('dataset.csv', mode='a') as dataset:
+        dataset_writer = csv.writer(dataset, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        dataset_writer.writerows([boardlist])
+
+
 if __name__ == '__main__':
-    game = gameboard()
+
     #NeuralNetwork = PerceptronNeuralNetwork(9,9)
     #NeuralNetwork.gameboard = game
 
-    clearScrean()
-    print("Welcome to TicTacTom!\nThe first player is being chosen at random.")
+    #clearScrean()
+    #print("Welcome to TicTacTom!\nThe first player is being chosen at random.")
 
-    if game.actionOnPlayer == 1:
-        print("The first player to take a turn is YOU")
-    else:
-        print("The AI gets the first turn")
+    # if game.actionOnPlayer == 1:
+    #     print("The first player to take a turn is YOU")
+    # else:
+    #     print("The AI gets the first turn")
 
     #game loop
-    game.nextTurn()
-    game.running = True
-    while game.running:
-        status = game.checkForWin()
-        if status == 0:
-            game.switchPlayer()
-            game.nextTurn()
-        elif status == 1:
-            print("Game over ", game.getPlayerStr(), " wins!")
-            exit()
-        elif status == 2:
-            print("Game over. It's a tie")
-            exit()
+    for i in range(100):
+        game = gameboard()
+        game.nextTurn()
+        game.running = True
+        while game.running:
+            status = game.checkForWin()
+            if status == 0:
+                game.switchPlayer()
+                game.nextTurn()
+            elif status == 1:
+                #export the list of gameboards and result to
+                print("Game over ", game.getPlayerStr(), " wins!")
+                if game.actionOnPlayer == 1: #Only save the games where player #1 wins!
+                    dumpData(game.gameboardlist)
+            elif status == 2:
+                print("Game over. It's a tie")
+                dumpData(game.gameboardlist)
