@@ -1,6 +1,7 @@
 import numpy as np
+import random
 import os
-from NeuralNet import PerceptronNeuralNetwork
+#from NeuralNet import PerceptronNeuralNetwork
 
 class gameboard():
     def __init__(self, seed=2):
@@ -9,7 +10,7 @@ class gameboard():
         self.gamestate = np.full((3,3), 0) #Initialise the board to be all ' ' characters
         self.gameboard = np.full((3,3), ' ') #Initiaise the graphical board
         self.actionOnPlayer = np.random.choice([1,2]) #1 = Player, 2 = AI
-
+        self.running = False
     def getPlayerStr(self):
         if self.actionOnPlayer == 1:
             return "X"
@@ -23,40 +24,33 @@ class gameboard():
             self.actionOnPlayer = 1
 
     def nextTurn(self):
-        print("Enter the desired X, Y location on the board.")
-        x = input("X:")
-        y = input("Y:")
+        # print("Enter the desired X, Y location on the board.")
+        # x = input("X:")
+        # y = input("Y:")
+        x = np.random.randint(1,3)
+        y = np.random.randint(1,3)
 
-        if self.processTurn(int(x),int(y)):
-            self.display()
-        else:
-            #turn invalid
-            self.nextTurn()
+        self.processTurn()
 
-        if not self.checkForWin():
-            self.switchPlayer()
-            self.nextTurn()
-        else: #handle win
-            print("Game over ", self.getPlayerStr(), " wins!")
+        self.display()
 
-    def processTurn(self, x, y):
+
+
+    def processTurn(self):
         #Check that the selection is a valid location
-        if self.checkSpot(x,y):
-           self.gamestate[y-1][x-1] = self.actionOnPlayer
-           self.gameboard[y-1][x-1] = self.getPlayerStr()
-           print(x,y," is a valid selection")
-           return True
-        else:
-            print("Invalid selection. Try again")
-            return False
+        valid_selection = False
+        while valid_selection == False:
+            x = random.randrange(3)
+            y = random.randrange(3)
+            if self.checkSpot(x,y):
+               self.gamestate[y-1][x-1] = self.actionOnPlayer
+               self.gameboard[y-1][x-1] = self.getPlayerStr()
+               valid_selection = True
 
-    def display(self):
-        clearScrean()
-        if self.debug:
-            print(self.gamestate)
-        print(self.gameboard)
+        return True
 
     def checkSpot(self, x,y):
+        #print(x,y)
         if self.gamestate[y-1][x-1] == 1 or self.gamestate[y-1][x-1] == 2:
             return False
         else:
@@ -66,8 +60,19 @@ class gameboard():
     def checkForWin(self):
         for indexes in win_indexes(3):
             if all(self.gamestate[r][c] == self.actionOnPlayer for r, c in indexes):
-                return True
-        return False
+                game.running = False
+                return 1
+        if np.count_nonzero(self.gamestate == 0)== 0:
+            game.running = False
+            return 2
+        return 0
+
+    def display(self):
+        clearScrean()
+        if self.debug:
+           print(self.gamestate.flatten())
+        #print(self.gameboard)
+
 
 def win_indexes(n):
     # Rows
@@ -86,15 +91,28 @@ def clearScrean():
 
 if __name__ == '__main__':
     game = gameboard()
-    NeuralNetwork = PerceptronNeuralNetwork(9,9)
-    NeuralNetwork.gameboard = game
+    #NeuralNetwork = PerceptronNeuralNetwork(9,9)
+    #NeuralNetwork.gameboard = game
 
     clearScrean()
     print("Welcome to TicTacTom!\nThe first player is being chosen at random.")
 
-    if game.actionOnPlayer is 1:
+    if game.actionOnPlayer == 1:
         print("The first player to take a turn is YOU")
     else:
         print("The AI gets the first turn")
 
+    #game loop
     game.nextTurn()
+    game.running = True
+    while game.running:
+        status = game.checkForWin()
+        if status == 0:
+            game.switchPlayer()
+            game.nextTurn()
+        elif status == 1:
+            print("Game over ", game.getPlayerStr(), " wins!")
+            exit()
+        elif status == 2:
+            print("Game over. It's a tie")
+            exit()
