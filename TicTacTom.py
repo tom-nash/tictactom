@@ -13,6 +13,7 @@ class gameboard():
         self.gameboardlist = []
         self.actionOnPlayer = np.random.choice([1,2]) #1 = Player, 2 = AI
         self.running = False
+        self.gameboardlist.append(self.gamestate.flatten().tolist())
 
     def getPlayerStr(self):
         if self.actionOnPlayer == 1:
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     #     print("The AI gets the first turn")
 
     #game loop
-    for i in range(100):
+    for i in range(10000):
         game = gameboard()
         game.nextTurn()
         game.running = True
